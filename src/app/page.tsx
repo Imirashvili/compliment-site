@@ -1,32 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-/* ===============================
-   ФОН ИЗ ДВИЖУЩИХСЯ ЭПИТЕТОВ
-================================ */
+type RandomResp = { text: string };
+type EpithetsResp = { words: string[] };
 
 function EpithetBackground() {
-  const [epithets, setEpithets] = useState<string[]>([]);
-  const [cols, setCols] = useState(8);
+  const [words, setWords] = useState<string[]>([]);
+  const [cols, setCols] = useState<number>(8);
 
+  // загрузка эпитетов
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/epithets", { cache: "no-store" });
-        const json = await res.json();
-        const list: string[] = json.epithets ?? [];
-        setEpithets(list.length ? list : ["нежная", "сияющая", "умная", "прекрасная"]);
-      } catch {
-        setEpithets(["нежная", "сияющая", "умная", "прекрасная"]);
-      }
-    })();
+    fetch("/api/epithets")
+      .then((r) => r.json())
+      .then((d: EpithetsResp) => setWords(d.words || []))
+      .catch(() => setWords([]));
   }, []);
 
-  // адаптивное количество колонок
+  // пересчёт колонок по ширине экрана
   useEffect(() => {
     const update = () => {
-      const w = window.innerWidth || 1200;
+      const w = window.innerWidth;
       const c = w < 480 ? 5 : Math.max(6, Math.min(12, Math.floor(w / 140)));
       setCols(c);
     };
@@ -35,83 +29,78 @@ function EpithetBackground() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const sliceForCol = (colIndex: number) => {
-    if (!epithets.length) return [];
-    const size = 60; // больше = плотнее фон, без "плешей"
-    const start = (colIndex * 37) % epithets.length;
+  const columns = useMemo(() => {
+    if (!words.length) return [];
+    const out: string[][] = [];
+    const size = 36; // меньше элементов = легче для мобильных
 
-    const part: string[] = [];
-    for (let i = 0; i < size; i++) {
-      part.push(epithets[(start + i) % epithets.length]);
+    for (let i = 0; i < cols; i++) {
+      const start = (i * 7) % words.length;
+      const col: string[] = [];
+      for (let j = 0; j < size; j++) {
+        col.push(words[(start + j) % words.length]);
+      }
+      out.push(col);
     }
-    return part;
-  };
+    return out;
+  }, [words, cols]);
 
   return (
-    <div className="bg-epithets" aria-hidden="true">
+    <div className="bg-epithets">
       <div className="bg-epithets-grid">
-        {Array.from({ length: cols }).map((_, i) => {
-          const words = sliceForCol(i);
+        {columns.map((col, i) => (
+          <div className="bg-col" key={i}>
+            <div className="bg-track">
+              <div className="bg-group">
+                {col.map((w, idx) => (
+                  <div className="bg-word" key={`a-${i}-${idx}`}>
+                    {w}
+                  </div>
+                ))}
+              </div>
 
-          return (
-            <div className="bg-col" key={i}>
-              <div className="bg-track">
-                <div className="bg-group">
-                  {words.map((w, idx) => (
-                    <div className="bg-word" key={`a-${i}-${idx}`}>
-                      {w}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Вторая такая же группа для бесшовной прокрутки */}
-                <div className="bg-group" aria-hidden="true">
-                  {words.map((w, idx) => (
-                    <div className="bg-word" key={`b-${i}-${idx}`}>
-                      {w}
-                    </div>
-                  ))}
-                </div>
+              {/* повтор для бесшовной прокрутки */}
+              <div className="bg-group" aria-hidden="true">
+                {col.map((w, idx) => (
+                  <div className="bg-word" key={`b-${i}-${idx}`}>
+                    {w}
+                  </div>
+                ))}
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-/* ===============================
-   ОСНОВНАЯ СТРАНИЦА
-================================ */
-
-export default function Home() {
-  const [text, setText] = useState("Загружаю…");
+export default function Page() {
+  const [text, setText] = useState<string>("…");
   const [loading, setLoading] = useState(false);
   const [animKey, setAnimKey] = useState(0);
 
-  const loadRandom = useCallback(async () => {
+  const loadRandom = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch("/api/random", { cache: "no-store" });
-      const json = await res.json();
-      setText(json.text ?? "Ты самая прекрасная");
+      const r = await fetch("/api/random", { cache: "no-store" });
+      const d: RandomResp = await r.json();
+      setText(d.text);
       setAnimKey((k) => k + 1);
     } catch {
-      setText("Ты самая прекрасная");
-      setAnimKey((k) => k + 1);
+      setText("Ты невероятная");
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     loadRandom();
-  }, [loadRandom]);
+  }, []);
 
   return (
-    <>
-      {/* Фон */}
+    <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+      {/* Фоновая анимация */}
       <EpithetBackground />
 
       {/* Подпись */}
@@ -173,6 +162,6 @@ export default function Home() {
           </button>
         </div>
       </main>
-    </>
+    </div>
   );
 }

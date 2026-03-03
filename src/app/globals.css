@@ -4,10 +4,14 @@
   --official-black: #1C1C1C;
 }
 
+<<<<<<< HEAD
 /* =========================
    БАЗА
 ========================= */
 
+=======
+/* Базовые настройки */
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 html, body {
   height: 100%;
 }
@@ -29,24 +33,41 @@ body {
 
 .corner-note {
   position: fixed;
+<<<<<<< HEAD
   bottom: 18px;
   right: 18px;
 
   font-size: 17px;
   font-weight: 800;
+=======
+  bottom: 22px;
+  right: 24px;
+
+  font-size: 20px;
+  font-weight: 700;
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 
   color: var(--official-black);
 
   letter-spacing: 0.5px;
+<<<<<<< HEAD
   line-height: 1.4;
   text-align: right;
 
   opacity: 0.95;
   max-width: 320px;
+=======
+  line-height: 1.45;
+  text-align: right;
+
+  opacity: 0.95;
+  max-width: 300px;
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 
   z-index: 2;
 }
 
+<<<<<<< HEAD
 /* Мобильная версия */
 @media (max-width: 480px) {
   .corner-note {
@@ -59,6 +80,14 @@ body {
     max-width: 240px;
   }
 }
+=======
+@media (min-width: 768px) {
+  .corner-note {
+    font-size: 15px;
+  }
+}
+
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 /* =========================
    АНИМАЦИЯ КОМПЛИМЕНТА
 ========================= */
@@ -83,17 +112,20 @@ body {
 }
 
 /* =========================
+<<<<<<< HEAD
    ФОН С ЭПИТЕТАМИ
+=======
+   ФОНОВЫЕ ЭПИТЕТЫ
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 ========================= */
 
 .bg-epithets {
-  position: fixed;
+  position: absolute; /* было fixed */
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
 
-  /* важная оптимизация для мобилок */
   transform: translateZ(0);
   will-change: transform;
 }
@@ -111,10 +143,14 @@ body {
   flex: 1;
   min-width: 60px;
   max-width: 140px;
+<<<<<<< HEAD
   height: 100%;
   overflow: hidden;
 
   contain: content;
+=======
+  overflow: hidden;
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 }
 
 /* Движущаяся дорожка */
@@ -122,6 +158,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+<<<<<<< HEAD
 
   transform: translate3d(0, 0, 0);
   will-change: transform;
@@ -132,12 +169,24 @@ body {
 }
 
 /* Группа слов (для бесшовной прокрутки A + A) */
+=======
+  will-change: transform;
+
+  /* ОДНА скорость для всех */
+  animation: marquee 40s linear infinite !important;
+}
+/* Группа слов (A + A для бесшовной петли) */
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 .bg-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+<<<<<<< HEAD
+=======
+/* Сами эпитеты */
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 .bg-word {
   font-size: 12px;
   letter-spacing: 0.4px;
@@ -147,6 +196,7 @@ body {
   white-space: nowrap;
 }
 
+<<<<<<< HEAD
 /* Ускорение и оптимизация на телефоне */
 @media (max-width: 480px) {
   .bg-word { font-size: 11px; }
@@ -162,4 +212,15 @@ body {
 @keyframes marquee {
   from { transform: translate3d(0, -50%, 0); }
   to   { transform: translate3d(0, 0%, 0); }
+=======
+@media (max-width: 480px) {
+  .bg-word { font-size: 11px; }
+  .bg-epithets-grid { gap: 12px; }
+}
+
+/* Бесшовная вертикальная прокрутка */
+@keyframes marquee {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+>>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 }
