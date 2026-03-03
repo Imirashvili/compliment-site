@@ -4,7 +4,10 @@
   --official-black: #1C1C1C;
 }
 
-/* Базовые настройки */
+/* =========================
+   БАЗА
+========================= */
+
 html, body {
   height: 100%;
 }
@@ -26,30 +29,36 @@ body {
 
 .corner-note {
   position: fixed;
-  bottom: 22px;
-  right: 24px;
+  bottom: 18px;
+  right: 18px;
 
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
 
   color: var(--official-black);
 
   letter-spacing: 0.5px;
-  line-height: 1.45;
+  line-height: 1.4;
   text-align: right;
 
   opacity: 0.95;
-  max-width: 300px;
+  max-width: 320px;
 
   z-index: 2;
 }
 
-@media (min-width: 768px) {
+/* Мобильная версия */
+@media (max-width: 480px) {
   .corner-note {
-    font-size: 15px;
+    font-size: 13px;      /* оптимальный размер для iPhone */
+    font-weight: 700;     /* чуть легче */
+    letter-spacing: 0.3px;
+    line-height: 1.35;
+    bottom: 14px;
+    right: 14px;
+    max-width: 240px;
   }
 }
-
 /* =========================
    АНИМАЦИЯ КОМПЛИМЕНТА
 ========================= */
@@ -74,7 +83,7 @@ body {
 }
 
 /* =========================
-   ФОНОВЫЕ ЭПИТЕТЫ
+   ФОН С ЭПИТЕТАМИ
 ========================= */
 
 .bg-epithets {
@@ -83,6 +92,10 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+
+  /* важная оптимизация для мобилок */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .bg-epithets-grid {
@@ -98,7 +111,10 @@ body {
   flex: 1;
   min-width: 60px;
   max-width: 140px;
+  height: 100%;
   overflow: hidden;
+
+  contain: content;
 }
 
 /* Движущаяся дорожка */
@@ -106,19 +122,22 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  will-change: transform;
 
-  /* ОДНА скорость для всех */
-  animation: marquee 40s linear infinite !important;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+
+  /* БАЗОВАЯ скорость */
+  animation: marquee 28s linear infinite;
 }
-/* Группа слов (A + A для бесшовной петли) */
+
+/* Группа слов (для бесшовной прокрутки A + A) */
 .bg-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Сами эпитеты */
 .bg-word {
   font-size: 12px;
   letter-spacing: 0.4px;
@@ -128,13 +147,19 @@ body {
   white-space: nowrap;
 }
 
+/* Ускорение и оптимизация на телефоне */
 @media (max-width: 480px) {
   .bg-word { font-size: 11px; }
   .bg-epithets-grid { gap: 12px; }
+
+  /* ускоряем на мобильном, иначе кажется что стоит */
+  .bg-track {
+    animation-duration: 18s;
+  }
 }
 
-/* Бесшовная вертикальная прокрутка */
+/* Движение СВЕРХУ ВНИЗ */
 @keyframes marquee {
-  from { transform: translateY(-50%); }
-  to   { transform: translateY(0); }
+  from { transform: translate3d(0, -50%, 0); }
+  to   { transform: translate3d(0, 0%, 0); }
 }

@@ -27,7 +27,7 @@ function EpithetBackground() {
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth || 1200;
-      const c = Math.max(5, Math.min(12, Math.floor(w / 140)));
+      const c = w < 480 ? 5 : Math.max(6, Math.min(12, Math.floor(w / 140)));
       setCols(c);
     };
     update();
