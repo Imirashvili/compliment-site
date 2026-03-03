@@ -4,14 +4,10 @@
   --official-black: #1C1C1C;
 }
 
-<<<<<<< HEAD
 /* =========================
    БАЗА
 ========================= */
 
-=======
-/* Базовые настройки */
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 html, body {
   height: 100%;
 }
@@ -33,61 +29,34 @@ body {
 
 .corner-note {
   position: fixed;
-<<<<<<< HEAD
   bottom: 18px;
   right: 18px;
 
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
-=======
-  bottom: 22px;
-  right: 24px;
-
-  font-size: 20px;
-  font-weight: 700;
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
-
   color: var(--official-black);
 
   letter-spacing: 0.5px;
-<<<<<<< HEAD
-  line-height: 1.4;
+  line-height: 1.35;
   text-align: right;
 
   opacity: 0.95;
   max-width: 320px;
-=======
-  line-height: 1.45;
-  text-align: right;
-
-  opacity: 0.95;
-  max-width: 300px;
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
-
   z-index: 2;
 }
 
-<<<<<<< HEAD
-/* Мобильная версия */
 @media (max-width: 480px) {
   .corner-note {
-    font-size: 13px;      /* оптимальный размер для iPhone */
-    font-weight: 700;     /* чуть легче */
+    font-size: 13px;
+    font-weight: 700;
     letter-spacing: 0.3px;
-    line-height: 1.35;
-    bottom: 14px;
-    right: 14px;
+    line-height: 1.3;
+    bottom: 12px;
+    right: 12px;
     max-width: 240px;
   }
 }
-=======
-@media (min-width: 768px) {
-  .corner-note {
-    font-size: 15px;
-  }
-}
 
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 /* =========================
    АНИМАЦИЯ КОМПЛИМЕНТА
 ========================= */
@@ -112,15 +81,12 @@ body {
 }
 
 /* =========================
-<<<<<<< HEAD
    ФОН С ЭПИТЕТАМИ
-=======
-   ФОНОВЫЕ ЭПИТЕТЫ
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
+   (под iPhone/Safari лучше absolute внутри контейнера)
 ========================= */
 
 .bg-epithets {
-  position: absolute; /* было fixed */
+  position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
@@ -143,50 +109,29 @@ body {
   flex: 1;
   min-width: 60px;
   max-width: 140px;
-<<<<<<< HEAD
   height: 100%;
   overflow: hidden;
-
   contain: content;
-=======
-  overflow: hidden;
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 }
 
-/* Движущаяся дорожка */
 .bg-track {
   display: flex;
   flex-direction: column;
   gap: 10px;
-<<<<<<< HEAD
 
   transform: translate3d(0, 0, 0);
   will-change: transform;
   backface-visibility: hidden;
 
-  /* БАЗОВАЯ скорость */
   animation: marquee 28s linear infinite;
 }
 
-/* Группа слов (для бесшовной прокрутки A + A) */
-=======
-  will-change: transform;
-
-  /* ОДНА скорость для всех */
-  animation: marquee 40s linear infinite !important;
-}
-/* Группа слов (A + A для бесшовной петли) */
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 .bg-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-<<<<<<< HEAD
-=======
-/* Сами эпитеты */
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 .bg-word {
   font-size: 12px;
   letter-spacing: 0.4px;
@@ -196,31 +141,14 @@ body {
   white-space: nowrap;
 }
 
-<<<<<<< HEAD
-/* Ускорение и оптимизация на телефоне */
 @media (max-width: 480px) {
   .bg-word { font-size: 11px; }
   .bg-epithets-grid { gap: 12px; }
-
-  /* ускоряем на мобильном, иначе кажется что стоит */
-  .bg-track {
-    animation-duration: 18s;
-  }
+  .bg-track { animation-duration: 18s; }
 }
 
 /* Движение СВЕРХУ ВНИЗ */
 @keyframes marquee {
   from { transform: translate3d(0, -50%, 0); }
   to   { transform: translate3d(0, 0%, 0); }
-=======
-@media (max-width: 480px) {
-  .bg-word { font-size: 11px; }
-  .bg-epithets-grid { gap: 12px; }
-}
-
-/* Бесшовная вертикальная прокрутка */
-@keyframes marquee {
-  from { transform: translateY(-50%); }
-  to   { transform: translateY(0); }
->>>>>>> f2f5ef2d14900bc2039559ffa4f38241f77ac618
 }
