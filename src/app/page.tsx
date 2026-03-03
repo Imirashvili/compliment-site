@@ -32,7 +32,7 @@ function EpithetBackground() {
   const columns = useMemo(() => {
     if (!words.length) return [];
     const out: string[][] = [];
-    const size = 36; // меньше элементов = легче для мобильных
+    const size = 60 // меньше элементов = легче для мобильных
 
     for (let i = 0; i < cols; i++) {
       const start = (i * 7) % words.length;
