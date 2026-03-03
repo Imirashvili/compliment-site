@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-type Compliment = {
-  text: string;
-};
-
-type EpithetsResp = {
-  words: string[];
-};
+type RandomResp = { text: string };
+type EpithetsResp = { words: string[] };
 
 function EpithetBackground() {
   const [words, setWords] = useState<string[]>([]);
@@ -38,65 +33,85 @@ function EpithetBackground() {
       .catch(() => setWords(fallback));
   }, []);
 
-  if (!words.length) return null;
+  // ВАЖНО: формируем колонки один раз при смене words (а не при каждом клике)
+  const cols = useMemo(() => {
+    if (!words.length) return [];
 
-  const columns = 8;
-  const size = 60;
+    const columns = 8; // сколько колонок
+    const size = 60;   // слов в колонке (повторяются бесшовно)
 
-  const cols = Array.from({ length: columns }).map((_, i) => {
-    const arr = Array.from({ length: size }).map(
-      () => words[Math.floor(Math.random() * words.length)]
-    );
+    // детерминированный "псевдорандом", чтобы было красиво и стабильно
+    const pick = (seed: number) => {
+      let x = seed % 2147483647;
+      x = (x * 48271) % 2147483647;
+      return x;
+    };
 
-    return (
-      <div key={i} className="bg-col">
-        <div className="bg-track">
-          <div className="bg-group">
-            {arr.map((w, j) => (
-              <div key={j} className="bg-word">
-                {w}
-              </div>
-            ))}
-          </div>
+    const out: string[][] = [];
+    for (let i = 0; i < columns; i++) {
+      let seed = 1000 + i * 97;
+      const col: string[] = [];
+      for (let j = 0; j < size; j++) {
+        seed = pick(seed);
+        col.push(words[seed % words.length]);
+      }
+      out.push(col);
+    }
 
-          <div className="bg-group">
-            {arr.map((w, j) => (
-              <div key={j} className="bg-word">
-                {w}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  });
+    return out;
+  }, [words]);
+
+  if (!cols.length) return null;
 
   return (
     <div className="bg-epithets">
-      <div className="bg-epithets-grid">{cols}</div>
+      <div className="bg-epithets-grid">
+        {cols.map((col, i) => (
+          <div key={i} className="bg-col">
+            <div className="bg-track">
+              <div className="bg-group">
+                {col.map((w, j) => (
+                  <div key={`a-${i}-${j}`} className="bg-word">
+                    {w}
+                  </div>
+                ))}
+              </div>
+
+              {/* повтор для бесшовной прокрутки */}
+              <div className="bg-group" aria-hidden="true">
+                {col.map((w, j) => (
+                  <div key={`b-${i}-${j}`} className="bg-word">
+                    {w}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 export default function Page() {
-  const [text, setText] = useState<string>("ЗАГРУЖАЮ…");
+  const [text, setText] = useState<string>("…");
   const [loading, setLoading] = useState(false);
   const [animKey, setAnimKey] = useState(0);
 
   const loadRandom = async () => {
     setLoading(true);
-
     try {
-      const res = await fetch("/api/compliment", { cache: "no-store" });
-      const data: Compliment = await res.json();
-
-      setText(data.text);
+      // ВАЖНО: роут должен совпадать с тем, что у тебя реально есть
+      // раньше у тебя было /api/random
+      const r = await fetch("/api/random", { cache: "no-store" });
+      const d: RandomResp = await r.json();
+      setText(d.text);
       setAnimKey((k) => k + 1);
     } catch {
       setText("ТЫ ПОТРЯСАЮЩАЯ");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -104,13 +119,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
       <EpithetBackground />
 
       <div className="corner-note fade-in">
@@ -128,12 +137,7 @@ export default function Page() {
           zIndex: 1,
         }}
       >
-        <div
-          style={{
-            width: "min(720px, 100%)",
-            textAlign: "center",
-          }}
-        >
+        <div style={{ width: "min(720px, 100%)", textAlign: "center" }}>
           <div
             key={animKey}
             className="fade-in pop"
@@ -167,13 +171,9 @@ export default function Page() {
               boxShadow: "0 10px 30px rgba(255, 90, 150, 0.35)",
               transition: "transform 120ms ease",
             }}
-            onMouseDown={(e) =>
-              (e.currentTarget.style.transform = "scale(0.98)")
-            }
+            onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.98)")}
             onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "scale(1)")
-            }
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
           >
             {loading ? "ГЕНЕРИРУЮ…" : "ЕЩЁ КОМПЛИМЕНТ"}
           </button>
