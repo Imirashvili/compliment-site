@@ -1,97 +1,102 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-type RandomResp = { text: string };
-type EpithetsResp = { words: string[] };
+type Compliment = {
+  text: string;
+};
+
+type EpithetsResp = {
+  words: string[];
+};
 
 function EpithetBackground() {
   const [words, setWords] = useState<string[]>([]);
-  const [cols, setCols] = useState<number>(8);
 
-  // загрузка эпитетов
   useEffect(() => {
-    fetch("/api/epithets")
+    const fallback = [
+      "нежная",
+      "сияющая",
+      "умная",
+      "прекрасная",
+      "вдохновляющая",
+      "элегантная",
+      "уникальная",
+      "волшебная",
+      "добрая",
+      "неповторимая",
+      "восхитительная",
+      "чуткая",
+    ];
+
+    fetch("/api/epithets", { cache: "no-store" })
       .then((r) => r.json())
-      .then((d: EpithetsResp) => setWords(d.words || []))
-      .catch(() => setWords([]));
+      .then((d: EpithetsResp) => {
+        const list = Array.isArray(d.words) ? d.words : [];
+        setWords(list.length ? list : fallback);
+      })
+      .catch(() => setWords(fallback));
   }, []);
 
-  // пересчёт колонок по ширине экрана
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      const c = w < 480 ? 5 : Math.max(6, Math.min(12, Math.floor(w / 140)));
-      setCols(c);
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+  if (!words.length) return null;
 
-  const columns = useMemo(() => {
-    if (!words.length) return [];
-    const out: string[][] = [];
-    const size = 60 // меньше элементов = легче для мобильных
+  const columns = 8;
+  const size = 60;
 
-    for (let i = 0; i < cols; i++) {
-      const start = (i * 7) % words.length;
-      const col: string[] = [];
-      for (let j = 0; j < size; j++) {
-        col.push(words[(start + j) % words.length]);
-      }
-      out.push(col);
-    }
-    return out;
-  }, [words, cols]);
+  const cols = Array.from({ length: columns }).map((_, i) => {
+    const arr = Array.from({ length: size }).map(
+      () => words[Math.floor(Math.random() * words.length)]
+    );
+
+    return (
+      <div key={i} className="bg-col">
+        <div className="bg-track">
+          <div className="bg-group">
+            {arr.map((w, j) => (
+              <div key={j} className="bg-word">
+                {w}
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-group">
+            {arr.map((w, j) => (
+              <div key={j} className="bg-word">
+                {w}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  });
 
   return (
     <div className="bg-epithets">
-      <div className="bg-epithets-grid">
-        {columns.map((col, i) => (
-          <div className="bg-col" key={i}>
-            <div className="bg-track">
-              <div className="bg-group">
-                {col.map((w, idx) => (
-                  <div className="bg-word" key={`a-${i}-${idx}`}>
-                    {w}
-                  </div>
-                ))}
-              </div>
-
-              {/* повтор для бесшовной прокрутки */}
-              <div className="bg-group" aria-hidden="true">
-                {col.map((w, idx) => (
-                  <div className="bg-word" key={`b-${i}-${idx}`}>
-                    {w}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="bg-epithets-grid">{cols}</div>
     </div>
   );
 }
 
 export default function Page() {
-  const [text, setText] = useState<string>("…");
+  const [text, setText] = useState<string>("ЗАГРУЖАЮ…");
   const [loading, setLoading] = useState(false);
   const [animKey, setAnimKey] = useState(0);
 
   const loadRandom = async () => {
     setLoading(true);
+
     try {
-      const r = await fetch("/api/random", { cache: "no-store" });
-      const d: RandomResp = await r.json();
-      setText(d.text);
+      const res = await fetch("/api/compliment", { cache: "no-store" });
+      const data: Compliment = await res.json();
+
+      setText(data.text);
       setAnimKey((k) => k + 1);
     } catch {
-      setText("Ты невероятная");
-    } finally {
-      setLoading(false);
+      setText("ТЫ ПОТРЯСАЮЩАЯ");
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -99,17 +104,20 @@ export default function Page() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
-      {/* Фоновая анимация */}
+    <div
+      style={{
+        minHeight: "100vh",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <EpithetBackground />
 
-      {/* Подпись */}
       <div className="corner-note fade-in">
         <div>С любовью и восхищением</div>
         <div>Отдел методологии и оцифровки</div>
       </div>
 
-      {/* Основной контент */}
       <main
         style={{
           minHeight: "100vh",
@@ -120,7 +128,12 @@ export default function Page() {
           zIndex: 1,
         }}
       >
-        <div style={{ width: "min(720px, 100%)", textAlign: "center" }}>
+        <div
+          style={{
+            width: "min(720px, 100%)",
+            textAlign: "center",
+          }}
+        >
           <div
             key={animKey}
             className="fade-in pop"
@@ -154,9 +167,13 @@ export default function Page() {
               boxShadow: "0 10px 30px rgba(255, 90, 150, 0.35)",
               transition: "transform 120ms ease",
             }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.98)")}
+            onMouseDown={(e) =>
+              (e.currentTarget.style.transform = "scale(0.98)")
+            }
             onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.transform = "scale(1)")
+            }
           >
             {loading ? "ГЕНЕРИРУЮ…" : "ЕЩЁ КОМПЛИМЕНТ"}
           </button>
