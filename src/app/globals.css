@@ -102,7 +102,7 @@ body {
   gap: 18px;
   justify-content: space-between;
   padding: 16px 14px;
-  opacity: 0.16;
+  opacity: 0.24;
 }
 
 .bg-col {
@@ -136,7 +136,7 @@ body {
   font-size: 12px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: #1C1C1C;
+  color: var(--accent);
   opacity: 0.9;
   white-space: nowrap;
 }
@@ -151,4 +151,9 @@ body {
 @keyframes marquee {
   from { transform: translate3d(0, -50%, 0); }
   to   { transform: translate3d(0, 0%, 0); }
+}
+@media (max-width: 480px) {
+  .bg-epithets-grid {
+    opacity: 0.28;
+  }
 }
