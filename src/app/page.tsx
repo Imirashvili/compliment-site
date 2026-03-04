@@ -33,28 +33,26 @@ function EpithetBackground() {
       .catch(() => setWords(fallback));
   }, []);
 
-  // ВАЖНО: формируем колонки один раз при смене words (а не при каждом клике)
+  // Колонки считаем один раз при смене words (чтобы фон НЕ менялся при клике)
   const cols = useMemo(() => {
     if (!words.length) return [];
 
-    const columns = 8; // сколько колонок
-    const size = 60;   // слов в колонке (повторяются бесшовно)
+    const columns = 8;
+    const size = 60;
 
-    // детерминированный "псевдорандом", чтобы было красиво и стабильно
-    const pick = (seed: number) => {
-      let x = seed % 2147483647;
-      x = (x * 48271) % 2147483647;
-      return x;
-    };
+    // детерминированный псевдорандом
+    const nextSeed = (seed: number) => (seed * 48271) % 2147483647;
 
     const out: string[][] = [];
     for (let i = 0; i < columns; i++) {
       let seed = 1000 + i * 97;
       const col: string[] = [];
+
       for (let j = 0; j < size; j++) {
-        seed = pick(seed);
+        seed = nextSeed(seed);
         col.push(words[seed % words.length]);
       }
+
       out.push(col);
     }
 
@@ -101,8 +99,6 @@ export default function Page() {
   const loadRandom = async () => {
     setLoading(true);
     try {
-      // ВАЖНО: роут должен совпадать с тем, что у тебя реально есть
-      // раньше у тебя было /api/random
       const r = await fetch("/api/random", { cache: "no-store" });
       const d: RandomResp = await r.json();
       setText(d.text);
@@ -147,6 +143,14 @@ export default function Page() {
               lineHeight: 1.05,
               fontSize: "clamp(36px, 7vw, 72px)",
               textTransform: "uppercase",
+
+              /* мобилка: чтобы длинные комплименты НЕ съезжали */
+              maxWidth: "min(680px, 100%)",
+              marginInline: "auto",
+              paddingInline: "6px",
+              textAlign: "center",
+              overflowWrap: "anywhere",
+              wordBreak: "keep-all",
             }}
           >
             {text}
