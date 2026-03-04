@@ -157,22 +157,23 @@ export default function Page() {
           <div
             key={animKey}
             className="fade-in pop"
-            style={{
-              fontWeight: 900,
-              letterSpacing: "0.5px",
-              lineHeight: 1.05,
-              fontSize: "clamp(36px, 7vw, 72px)",
-              textTransform: "uppercase",
-maxWidth: "min(680px, 100%)",
-marginInline: "auto",
-paddingInline: "10px",
-textAlign: "center",
+style={{
+  fontWeight: 900,
+  letterSpacing: "0.5px",
+  lineHeight: 1.05,
+  fontSize: "clamp(36px, 7vw, 72px)",
+  textTransform: "uppercase",
 
-hyphens: "none",
-wordBreak: "normal",
-overflowWrap: "normal",
-whiteSpace: "normal",
-            }}
+  maxWidth: "720px",
+  margin: "0 auto",
+
+  textAlign: "center",
+  textWrap: "balance",
+
+  hyphens: "none",
+  wordBreak: "keep-all",
+  overflowWrap: "normal",
+}}
           >
             {text}
           </div>
