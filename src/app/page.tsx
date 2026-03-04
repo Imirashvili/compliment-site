@@ -3,118 +3,72 @@
 import { useEffect, useMemo, useState } from "react";
 
 type RandomResp = { text: string };
-type EpithetsResp = { words: string[] };
 
-function shuffle<T>(arr: T[], seed = 12345): T[] {
-  let x = seed % 2147483647;
-  const next = () => (x = (x * 48271) % 2147483647);
+/**
+ * Плакатный перенос:
+ * - если первое слово короткое (обычно "ТЫ") — выносим его в отдельную строку
+ * - НЕ рвём слова (никаких изящ-ная)
+ * - 3 слова: "ТЫ" / "остальные 2 слова"
+ * - 4+ слов: делим оставшиеся слова на 2 строки максимально ровно по длине
+ */
+function splitCompliment(text: string): string[] {
+  const w = text.trim().split(/\s+/).filter(Boolean);
+  if (w.length === 0) return ["…"];
+  if (w.length === 1) return [w[0]];
 
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const r = next() % (i + 1);
-    [a[i], a[r]] = [a[r], a[i]];
+  const firstIsShort = w[0].length <= 3; // "ТЫ" или подобное
+
+  // 2 слова
+  if (w.length === 2) {
+    // "ТЫ" / "КРАСИВАЯ"
+    return [w[0], w[1]];
   }
-  return a;
+
+  // 3 слова — как ты хочешь: "ТЫ" отдельно, остальное вместе
+  if (w.length === 3) {
+    if (firstIsShort) return [w[0], `${w[1]} ${w[2]}`];
+    return [`${w[0]} ${w[1]}`, w[2]];
+  }
+
+  // 4+ слов
+  // Если первое короткое — делим оставшиеся слова (w[1..]) на 2 строки как можно ровнее
+  if (firstIsShort) {
+    const rest = w.slice(1);
+    const [a, b] = bestTwoLineSplit(rest);
+    return [w[0], a, b].filter(Boolean);
+  }
+
+  // Если первое не короткое — делим все слова на 2 строки как можно ровнее
+  const [a, b] = bestTwoLineSplit(w);
+  return [a, b].filter(Boolean);
 }
 
-function EpithetBackground() {
-  const [words, setWords] = useState<string[]>([]);
-  const [columns, setColumns] = useState<number>(8);
+function bestTwoLineSplit(words: string[]): [string, string] {
+  if (words.length <= 1) return [words.join(" "), ""];
 
-  useEffect(() => {
-    // определяем количество колонок по ширине экрана (ключ для "не режет слова")
-    const apply = () => {
-      const w = window.innerWidth || 390;
-      if (w <= 420) setColumns(4);
-      else if (w <= 820) setColumns(6);
-      else setColumns(8);
-    };
+  let bestIdx = 1;
+  let bestDiff = Infinity;
 
-    apply();
-    window.addEventListener("resize", apply);
-    return () => window.removeEventListener("resize", apply);
-  }, []);
+  for (let i = 1; i <= words.length - 1; i++) {
+    const left = words.slice(0, i).join(" ");
+    const right = words.slice(i).join(" ");
+    const diff = Math.abs(left.length - right.length);
 
-  useEffect(() => {
-    const fallback = [
-      "нежная",
-      "сияющая",
-      "умная",
-      "прекрасная",
-      "вдохновляющая",
-      "элегантная",
-      "уникальная",
-      "волшебная",
-      "добрая",
-      "неповторимая",
-      "восхитительная",
-      "чуткая",
-    ];
-
-    fetch("/api/epithets", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d: EpithetsResp) => {
-        const list = Array.isArray(d.words) ? d.words : [];
-        setWords(list.length ? list : fallback);
-      })
-      .catch(() => setWords(fallback));
-  }, []);
-
-  const cols = useMemo(() => {
-    if (!words.length) return [];
-
-    const size = 70; // больше элементов => меньше заметных повторов
-    const pool = shuffle(words, 777);
-
-    const out: string[][] = [];
-    const step = Math.max(1, Math.floor(pool.length / columns));
-
-    for (let i = 0; i < columns; i++) {
-      const start = (i * step) % pool.length;
-      const col: string[] = [];
-      for (let j = 0; j < size; j++) {
-        col.push(pool[(start + j) % pool.length]);
-      }
-      out.push(col);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      bestIdx = i;
     }
-    return out;
-  }, [words, columns]);
+  }
 
-  if (!cols.length) return null;
-
-  return (
-    <div className="bg-epithets">
-      <div className="bg-epithets-grid">
-        {cols.map((col, i) => (
-          <div key={i} className="bg-col">
-            <div className="bg-track">
-              <div className="bg-group">
-                {col.map((w, j) => (
-                  <div key={`a-${i}-${j}`} className="bg-word">
-                    {w}
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-group" aria-hidden="true">
-                {col.map((w, j) => (
-                  <div key={`b-${i}-${j}`} className="bg-word">
-                    {w}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  return [words.slice(0, bestIdx).join(" "), words.slice(bestIdx).join(" ")];
 }
 
 export default function Page() {
-  const [text, setText] = useState<string>("…");
+  const [text, setText] = useState("…");
   const [loading, setLoading] = useState(false);
   const [animKey, setAnimKey] = useState(0);
+
+  const lines = useMemo(() => splitCompliment(text), [text]);
 
   const loadRandom = async () => {
     setLoading(true);
@@ -135,9 +89,8 @@ export default function Page() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
-      <EpithetBackground />
-
+    <>
+      {/* подпись снизу справа (если у тебя она уже есть — можно убрать отсюда) */}
       <div className="corner-note fade-in">
         <div>С любовью и восхищением</div>
         <div>Отдел методологии и оцифровки</div>
@@ -154,32 +107,45 @@ export default function Page() {
         }}
       >
         <div style={{ width: "min(720px, 100%)", textAlign: "center" }}>
+          {/* КОМПЛИМЕНТ */}
           <div
             key={animKey}
             className="fade-in pop"
-style={{
-  fontWeight: 900,
-  letterSpacing: "0.5px",
-  lineHeight: 1.05,
-  fontSize: "clamp(36px, 7vw, 72px)",
-  textTransform: "uppercase",
+            style={{
+              fontWeight: 900,
+              letterSpacing: "0.5px",
+              lineHeight: 1.05,
+              fontSize: "clamp(36px, 7vw, 72px)",
+              textTransform: "uppercase",
 
-  maxWidth: "18ch",
-  margin: "0 auto",
+              // центрируем весь блок строк
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "center",
 
-  textAlign: "center",
-  textWrap: "balance",
-
-  hyphens: "none",
-  wordBreak: "keep-all",
-  overflowWrap: "normal",
-}}
+              // запрет переносов внутри слов
+              hyphens: "none",
+              wordBreak: "keep-all",
+              overflowWrap: "normal",
+            }}
           >
-            {text}
+            {lines.map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  // строка всегда 1 линия, перенос только между строками, которые мы сделали сами
+                  whiteSpace: "nowrap",
+                  textAlign: "center",
+                }}
+              >
+                {line}
+              </div>
+            ))}
           </div>
 
           <div style={{ height: 24 }} />
 
+          {/* КНОПКА */}
           <button
             onClick={loadRandom}
             disabled={loading}
@@ -205,6 +171,6 @@ style={{
           </button>
         </div>
       </main>
-    </div>
+    </>
   );
 }
