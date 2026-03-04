@@ -163,15 +163,15 @@ export default function Page() {
               lineHeight: 1.05,
               fontSize: "clamp(36px, 7vw, 72px)",
               textTransform: "uppercase",
+maxWidth: "min(680px, 100%)",
+marginInline: "auto",
+paddingInline: "10px",
+textAlign: "center",
 
-              maxWidth: "min(680px, 100%)",
-              marginInline: "auto",
-              paddingInline: "10px",
-              textAlign: "center",
-
-              overflowWrap: "normal",
-              wordBreak: "normal",
-              hyphens: "auto",
+hyphens: "none",
+wordBreak: "normal",
+overflowWrap: "normal",
+whiteSpace: "normal",
             }}
           >
             {text}

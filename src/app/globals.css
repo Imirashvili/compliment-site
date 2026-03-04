@@ -100,6 +100,7 @@ body {
   height: 100%;
   overflow: hidden; /* важно: если слово шире колонки — обрежется, поэтому на мобилке делаем колонки шире и меньше их */
   contain: content;
+  text-align: center;
 }
 
 .bg-track {
@@ -112,6 +113,7 @@ body {
   backface-visibility: hidden;
 
   animation: marquee 28s linear infinite;
+  align-items: center;
 }
 
 .bg-group {
@@ -129,6 +131,7 @@ body {
 
   /* ВСЕГДА ОДНА СТРОКА */
   white-space: nowrap;
+  display: inline-block;
 }
 
 /* Движение СВЕРХУ ВНИЗ */
