@@ -5,8 +5,35 @@ import { useEffect, useMemo, useState } from "react";
 type RandomResp = { text: string };
 type EpithetsResp = { words: string[] };
 
+function shuffle<T>(arr: T[], seed = 12345): T[] {
+  let x = seed % 2147483647;
+  const next = () => (x = (x * 48271) % 2147483647);
+
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const r = next() % (i + 1);
+    [a[i], a[r]] = [a[r], a[i]];
+  }
+  return a;
+}
+
 function EpithetBackground() {
   const [words, setWords] = useState<string[]>([]);
+  const [columns, setColumns] = useState<number>(8);
+
+  useEffect(() => {
+    // определяем количество колонок по ширине экрана (ключ для "не режет слова")
+    const apply = () => {
+      const w = window.innerWidth || 390;
+      if (w <= 420) setColumns(4);
+      else if (w <= 820) setColumns(6);
+      else setColumns(8);
+    };
+
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, []);
 
   useEffect(() => {
     const fallback = [
@@ -33,31 +60,25 @@ function EpithetBackground() {
       .catch(() => setWords(fallback));
   }, []);
 
-  // Колонки считаем один раз при смене words (чтобы фон НЕ менялся при клике)
   const cols = useMemo(() => {
     if (!words.length) return [];
 
-    const columns = 8;
-    const size = 60;
-
-    // детерминированный псевдорандом
-    const nextSeed = (seed: number) => (seed * 48271) % 2147483647;
+    const size = 70; // больше элементов => меньше заметных повторов
+    const pool = shuffle(words, 777);
 
     const out: string[][] = [];
+    const step = Math.max(1, Math.floor(pool.length / columns));
+
     for (let i = 0; i < columns; i++) {
-      let seed = 1000 + i * 97;
+      const start = (i * step) % pool.length;
       const col: string[] = [];
-
       for (let j = 0; j < size; j++) {
-        seed = nextSeed(seed);
-        col.push(words[seed % words.length]);
+        col.push(pool[(start + j) % pool.length]);
       }
-
       out.push(col);
     }
-
     return out;
-  }, [words]);
+  }, [words, columns]);
 
   if (!cols.length) return null;
 
@@ -75,7 +96,6 @@ function EpithetBackground() {
                 ))}
               </div>
 
-              {/* повтор для бесшовной прокрутки */}
               <div className="bg-group" aria-hidden="true">
                 {col.map((w, j) => (
                   <div key={`b-${i}-${j}`} className="bg-word">
@@ -144,13 +164,14 @@ export default function Page() {
               fontSize: "clamp(36px, 7vw, 72px)",
               textTransform: "uppercase",
 
-              /* мобилка: чтобы длинные комплименты НЕ съезжали */
               maxWidth: "min(680px, 100%)",
               marginInline: "auto",
-              paddingInline: "6px",
+              paddingInline: "10px",
               textAlign: "center",
-              overflowWrap: "anywhere",
-              wordBreak: "keep-all",
+
+              overflowWrap: "normal",
+              wordBreak: "normal",
+              hyphens: "auto",
             }}
           >
             {text}

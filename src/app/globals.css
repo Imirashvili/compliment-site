@@ -7,10 +7,7 @@
 /* =========================
    БАЗА
 ========================= */
-
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   margin: 0;
@@ -19,14 +16,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 /* =========================
    ПОДПИСЬ ВНИЗУ СПРАВА
 ========================= */
-
 .corner-note {
   position: fixed;
   bottom: 18px;
@@ -60,30 +54,22 @@ body {
 /* =========================
    АНИМАЦИЯ КОМПЛИМЕНТА
 ========================= */
-
-.fade-in {
-  animation: fadeInUp 420ms ease-out both;
-}
-
+.fade-in { animation: fadeInUp 420ms ease-out both; }
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.pop {
-  animation: pop 260ms ease-out both;
-}
-
+.pop { animation: pop 260ms ease-out both; }
 @keyframes pop {
-  0%   { transform: scale(0.985); }
-  60%  { transform: scale(1.01); }
+  0% { transform: scale(0.985); }
+  60% { transform: scale(1.01); }
   100% { transform: scale(1); }
 }
 
 /* =========================
    ФОН С ЭПИТЕТАМИ
 ========================= */
-
 .bg-epithets {
   position: absolute;
   inset: 0;
@@ -100,7 +86,7 @@ body {
   display: flex;
   justify-content: space-between;
 
-  /* ПК: уменьшаем разрыв между колонками */
+  /* ПК: меньше разрыв между колонками */
   gap: 10px;
 
   padding: 16px 14px;
@@ -112,7 +98,7 @@ body {
   min-width: 70px;
   max-width: 130px;
   height: 100%;
-  overflow: hidden;
+  overflow: hidden; /* важно: если слово шире колонки — обрежется, поэтому на мобилке делаем колонки шире и меньше их */
   contain: content;
 }
 
@@ -138,11 +124,10 @@ body {
   font-size: 12px;
   letter-spacing: 0.35px;
   text-transform: uppercase;
-
-  /* фон теперь в фирменном розовом, но мягко */
   color: var(--accent);
-
   opacity: 0.9;
+
+  /* ВСЕГДА ОДНА СТРОКА */
   white-space: nowrap;
 }
 
@@ -153,29 +138,27 @@ body {
 }
 
 /* =========================
-   МОБИЛКА: центрируем, не режем слова
+   МОБИЛКА: слова в 1 строку и без обрезаний
+   => меньше колонок делаем в page.tsx (4),
+   тут делаем колонки шире и шрифт чуть меньше
 ========================= */
-
 @media (max-width: 480px) {
-  .bg-word {
-    font-size: 10px;
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-  }
-
-  /* на мобилке делаем колонки шире, чтобы слова не обрезались */
-  .bg-col {
-    min-width: 78px;
-    max-width: 120px;
-  }
-
   .bg-epithets-grid {
     gap: 10px;
     opacity: 0.28;
     padding: 14px 10px;
   }
 
-  .bg-track {
-    animation-duration: 18s;
+  .bg-col {
+    min-width: 96px;
+    max-width: 140px;
   }
+
+  .bg-word {
+    font-size: 9px;
+    letter-spacing: 0.18px;
+    white-space: nowrap; /* строго 1 строка */
+  }
+
+  .bg-track { animation-duration: 18s; }
 }
