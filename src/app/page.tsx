@@ -164,7 +164,7 @@ style={{
   fontSize: "clamp(36px, 7vw, 72px)",
   textTransform: "uppercase",
 
-  maxWidth: "720px",
+  maxWidth: "18ch",
   margin: "0 auto",
 
   textAlign: "center",
