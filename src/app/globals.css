@@ -121,19 +121,18 @@ body {
   flex-direction: column;
   gap: 10px;
 }
-
 .bg-word {
   font-size: 12px;
   letter-spacing: 0.35px;
   text-transform: uppercase;
   color: var(--accent);
-  opacity: 0.9;
 
-  /* ВСЕГДА ОДНА СТРОКА */
+  opacity: 0.45;
+
   white-space: nowrap;
-  display: inline-block;
-}
 
+  filter: blur(0.6px);
+}
 /* Движение СВЕРХУ ВНИЗ */
 @keyframes marquee {
   from { transform: translate3d(0, -50%, 0); }
